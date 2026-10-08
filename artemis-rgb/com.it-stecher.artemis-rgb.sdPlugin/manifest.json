@@ -1,6 +1,6 @@
 {
   "Name": "Artemis-RGB",
-  "Version": "0.3.0.0",
+  "Version": "0.4.0.0",
   "Author": "IT-Stecher",
   "Actions": [
     {
@@ -9,9 +9,23 @@
       "Icon": "imgs/actions/profile-select/icon",
       "Tooltip": "Select and exclusively load an Artemis RGB profile.",
       "PropertyInspectorPath": "ui/profile-toggle.html",
-      "Controllers": ["Keypad", "Encoder"],
-      "States": [{"Image":"imgs/actions/profile-select/key","TitleAlignment":"middle"}],
-      "Encoder": {"layout":"$A1","TriggerDescription":{"Rotate":"Select Artemis profile","Push":"Load selected profile"}}
+      "Controllers": [
+        "Keypad",
+        "Encoder"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/profile-select/key",
+          "TitleAlignment": "middle"
+        }
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Select Artemis profile",
+          "Push": "Load selected profile"
+        }
+      }
     },
     {
       "Name": "JSON Variable Toggle",
@@ -19,9 +33,22 @@
       "Icon": "imgs/actions/json-toggle/icon",
       "Tooltip": "Toggle a boolean variable in Artemis JSON Modules.",
       "PropertyInspectorPath": "ui/json-variable-toggle.html",
-      "Controllers": ["Keypad", "Encoder"],
-      "States": [{"Image":"imgs/actions/json-toggle/key","TitleAlignment":"middle"}],
-      "Encoder": {"layout":"$A1","TriggerDescription":{"Push":"Toggle Artemis variable"}}
+      "Controllers": [
+        "Keypad",
+        "Encoder"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/json-toggle/key",
+          "TitleAlignment": "middle"
+        }
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Push": "Toggle Artemis variable"
+        }
+      }
     },
     {
       "Name": "JSON Variable Dial",
@@ -29,8 +56,16 @@
       "Icon": "imgs/actions/json-dial/icon",
       "Tooltip": "Control a numeric Artemis JSON Module variable with a Stream Deck+ dial.",
       "PropertyInspectorPath": "ui/json-variable-dial.html",
-      "Controllers": ["Encoder"],
-      "Encoder": {"layout":"$A1","TriggerDescription":{"Rotate":"Adjust Artemis variable","Push":"Reset to default"}}
+      "Controllers": [
+        "Encoder"
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Adjust Artemis variable",
+          "Push": "Reset to default"
+        }
+      }
     }
   ],
   "Category": "Artemis-RGB",
@@ -39,8 +74,22 @@
   "Description": "Control Artemis-RGB profiles and JSON variables from Stream Deck and Stream Deck+.",
   "Icon": "imgs/plugin/marketplace",
   "SDKVersion": 3,
-  "Software": {"MinimumVersion":"7.1"},
-  "OS": [{"Platform":"mac","MinimumVersion":"12"},{"Platform":"windows","MinimumVersion":"10"}],
-  "Nodejs": {"Version":"24","Debug":"enabled"},
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Nodejs": {
+    "Version": "24",
+    "Debug": "enabled"
+  },
   "UUID": "com.it-stecher.artemis-rgb"
 }

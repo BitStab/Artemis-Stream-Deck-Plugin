@@ -3,6 +3,7 @@ import type {
     ArtemisProfile,
     ArtemisProfileCategory,
     ArtemisJsonModule,
+    ArtemisJsonVariable,
     ArtemisJsonVariableType
 } from "./artemis-types";
 
@@ -95,6 +96,32 @@ export class ArtemisClient {
             throw new ArtemisApiError("Artemis /json-modules returned an unexpected response (expected an array)");
         }
         return raw.map((item, index) => normalizeJsonModule(item, index));
+    }
+
+    async getDataModel(): Promise<unknown> {
+        return this.requestJson<unknown>("data-model");
+    }
+
+    async getJsonVariableValue(moduleId: string, variableName: string): Promise<unknown> {
+        const dataModel = await this.getDataModel();
+        const module = findNamedObject(dataModel, moduleId.trim());
+        if (!module) {
+            throw new ArtemisApiError(`JSON module '${moduleId}' was not found in the Artemis data model`);
+        }
+        const entry = findPropertyCaseInsensitive(module, variableName.trim());
+        if (!entry.found) {
+            throw new ArtemisApiError(`Variable '${variableName}' was not found in JSON module '${moduleId}'`);
+        }
+        return entry.value;
+    }
+
+    async tryGetJsonVariableValue(moduleId: string, variableName: string): Promise<unknown | undefined> {
+        try {
+            return await this.getJsonVariableValue(moduleId, variableName);
+        } catch (error) {
+            if (error instanceof ArtemisApiError) return undefined;
+            throw error;
+        }
     }
 
     async ensureJsonVariable(
@@ -238,7 +265,8 @@ function normalizeJsonModule(value: unknown, index: number): ArtemisJsonModule {
     const moduleId = text(raw.moduleId ?? raw.ModuleId);
     if (!moduleId) throw new ArtemisApiError(`JSON module #${index + 1} returned by Artemis has no moduleId/ModuleId`);
     const schemaRaw = raw.schema ?? raw.Schema;
-    return { moduleId, schema: isRecord(schemaRaw) ? schemaRaw : {} };
+    const schema = isRecord(schemaRaw) ? schemaRaw : {};
+    return { moduleId, schema, variables: extractJsonVariables(schema) };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -247,6 +275,68 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function cloneSchema(schema: Record<string, unknown> | undefined): Record<string, unknown> {
     return schema ? JSON.parse(JSON.stringify(schema)) as Record<string, unknown> : {};
 }
+function extractJsonVariables(schema: Record<string, unknown>): ArtemisJsonVariable[] {
+    const properties = isRecord(schema.properties) ? schema.properties : {};
+    const result: ArtemisJsonVariable[] = [];
+    for (const [name, value] of Object.entries(properties)) {
+        if (!isRecord(value)) continue;
+        const rawType = text(value.type ?? value.Type).toLowerCase();
+        if (rawType !== "boolean" && rawType !== "number" && rawType !== "integer" && rawType !== "string") continue;
+        const variable: ArtemisJsonVariable = {
+            name,
+            title: text(value.title ?? value.Title) || humanize(name),
+            type: rawType as ArtemisJsonVariableType
+        };
+        const description = text(value.description ?? value.Description);
+        if (description) variable.description = description;
+        const minimum = Number(value.minimum ?? value.Minimum);
+        const maximum = Number(value.maximum ?? value.Maximum);
+        if (Number.isFinite(minimum)) variable.minimum = minimum;
+        if (Number.isFinite(maximum)) variable.maximum = maximum;
+        const defaultValue = value.default ?? value.Default;
+        if (typeof defaultValue === "boolean" || typeof defaultValue === "string" || typeof defaultValue === "number") {
+            variable.defaultValue = defaultValue;
+        }
+        result.push(variable);
+    }
+    return result.sort((a, b) => a.title.localeCompare(b.title));
+}
+
+function findNamedObject(root: unknown, name: string): UnknownRecord | undefined {
+    const wanted = name.toLowerCase();
+    const seen = new Set<object>();
+    const visit = (value: unknown): UnknownRecord | undefined => {
+        if (value === null || typeof value !== "object") return undefined;
+        if (seen.has(value as object)) return undefined;
+        seen.add(value as object);
+        if (Array.isArray(value)) {
+            for (const child of value) {
+                const found = visit(child);
+                if (found) return found;
+            }
+            return undefined;
+        }
+        const record = value as UnknownRecord;
+        for (const [key, child] of Object.entries(record)) {
+            if (key.toLowerCase() === wanted && isRecord(child)) return child;
+        }
+        for (const child of Object.values(record)) {
+            const found = visit(child);
+            if (found) return found;
+        }
+        return undefined;
+    };
+    return visit(root);
+}
+
+function findPropertyCaseInsensitive(record: UnknownRecord, name: string): { found: boolean; value?: unknown } {
+    const wanted = name.toLowerCase();
+    for (const [key, value] of Object.entries(record)) {
+        if (key.toLowerCase() === wanted) return { found: true, value };
+    }
+    return { found: false };
+}
+
 function humanize(value: string): string {
     return value.replace(/[_-]+/g, " ").replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/^./, c => c.toUpperCase());
 }

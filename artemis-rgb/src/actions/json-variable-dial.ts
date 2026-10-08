@@ -18,7 +18,6 @@ export type JsonVariableDialSettings = {
     maximum?: number;
     step?: number;
     defaultValue?: number;
-    currentValue?: number;
     suffix?: string;
 };
 
@@ -31,62 +30,85 @@ export class JsonVariableDial extends SingletonAction<JsonVariableDialSettings> 
             await ev.action.setFeedbackLayout("$A1");
             await ev.action.setTriggerDescription({ rotate: "Adjust Artemis variable", push: "Reset to default" });
         }
-        const settings = normalizeSettings(ev.payload.settings);
-        if (settings.currentValue !== ev.payload.settings.currentValue) await ev.action.setSettings(settings);
-        await this.render(ev.action, settings);
-        await this.sync(ev.action, settings);
+        await this.syncFromArtemis(ev.action, normalizeSettings(ev.payload.settings));
     }
 
     override async onDidReceiveSettings(ev: DidReceiveSettingsEvent<JsonVariableDialSettings>): Promise<void> {
-        const settings = normalizeSettings(ev.payload.settings);
-        await this.render(ev.action, settings);
-        await this.sync(ev.action, settings);
+        await this.syncFromArtemis(ev.action, normalizeSettings(ev.payload.settings));
     }
 
     override async onDialRotate(ev: DialRotateEvent<JsonVariableDialSettings>): Promise<void> {
         const settings = normalizeSettings(ev.payload.settings);
-        const next = clamp(settings.currentValue! + ev.payload.ticks * settings.step!, settings.minimum!, settings.maximum!);
-        const updated = { ...settings, currentValue: roundStep(next, settings.step!) };
-        await ev.action.setSettings(updated);
-        await this.sync(ev.action, updated);
+        if (!settings.variableName.trim()) return this.renderMissing(ev.action);
+        try {
+            const client = new ArtemisClient(await getArtemisConnectionOptions());
+            await client.ensureJsonVariable(settings.moduleId, settings.variableName, "number", {
+                title: settings.label.trim() || undefined,
+                minimum: settings.minimum,
+                maximum: settings.maximum
+            });
+            const rawCurrent = await client.tryGetJsonVariableValue(settings.moduleId, settings.variableName);
+            const current = typeof rawCurrent === "number" && Number.isFinite(rawCurrent) ? rawCurrent : settings.defaultValue;
+            const next = roundStep(clamp(current + ev.payload.ticks * settings.step, settings.minimum, settings.maximum), settings.step);
+            await client.setJsonModuleData(settings.moduleId, { [settings.variableName]: next });
+            await this.render(ev.action, settings, next);
+        } catch (error) {
+            await this.handleError(ev.action, error);
+        }
     }
 
     override async onDialDown(ev: DialDownEvent<JsonVariableDialSettings>): Promise<void> {
         const settings = normalizeSettings(ev.payload.settings);
-        const updated = { ...settings, currentValue: clamp(settings.defaultValue!, settings.minimum!, settings.maximum!) };
-        await ev.action.setSettings(updated);
-        await this.sync(ev.action, updated);
-    }
-
-    private async sync(actionInstance: any, settings: Required<JsonVariableDialSettings>): Promise<void> {
-        if (!settings.variableName.trim()) {
-            await actionInstance.setFeedback({ title: "Artemis", value: "Set variable" });
-            return;
-        }
+        if (!settings.variableName.trim()) return this.renderMissing(ev.action);
         try {
             const client = new ArtemisClient(await getArtemisConnectionOptions());
-            await client.setJsonVariable(
-                settings.moduleId.trim() || DEFAULT_MODULE,
-                settings.variableName.trim(),
-                "number",
-                settings.currentValue,
-                { title: settings.label.trim() || undefined, minimum: settings.minimum, maximum: settings.maximum }
-            );
-            await this.render(actionInstance, settings);
+            await client.ensureJsonVariable(settings.moduleId, settings.variableName, "number", {
+                title: settings.label.trim() || undefined,
+                minimum: settings.minimum,
+                maximum: settings.maximum
+            });
+            const next = clamp(settings.defaultValue, settings.minimum, settings.maximum);
+            await client.setJsonModuleData(settings.moduleId, { [settings.variableName]: next });
+            await this.render(ev.action, settings, next);
         } catch (error) {
-            const message = error instanceof ArtemisApiError ? error.message : String(error);
-            streamDeck.logger.error(`JSON Variable Dial failed: ${message}`);
-            await actionInstance.setFeedback({ title: "Artemis", value: "ERROR" });
-            await actionInstance.showAlert();
+            await this.handleError(ev.action, error);
         }
     }
 
-    private async render(actionInstance: any, settings: Required<JsonVariableDialSettings>): Promise<void> {
+    private async syncFromArtemis(actionInstance: any, settings: Required<JsonVariableDialSettings>): Promise<void> {
+        if (!settings.variableName.trim()) return this.renderMissing(actionInstance);
+        try {
+            const client = new ArtemisClient(await getArtemisConnectionOptions());
+            await client.ensureJsonVariable(settings.moduleId, settings.variableName, "number", {
+                title: settings.label.trim() || undefined,
+                minimum: settings.minimum,
+                maximum: settings.maximum
+            });
+            const rawCurrent = await client.tryGetJsonVariableValue(settings.moduleId, settings.variableName);
+            const current = typeof rawCurrent === "number" && Number.isFinite(rawCurrent) ? rawCurrent : settings.defaultValue;
+            await this.render(actionInstance, settings, current);
+        } catch (error) {
+            await this.handleError(actionInstance, error);
+        }
+    }
+
+    private async render(actionInstance: any, settings: Required<JsonVariableDialSettings>, value: number): Promise<void> {
         const label = settings.label.trim() || settings.variableName.trim() || "Variable";
         await actionInstance.setFeedback({
             title: truncate(label, 20),
-            value: `${formatNumber(settings.currentValue)}${settings.suffix}`
+            value: `${formatNumber(value)}${settings.suffix}`
         });
+    }
+
+    private async renderMissing(actionInstance: any): Promise<void> {
+        await actionInstance.setFeedback({ title: "Artemis", value: "Set variable" });
+    }
+
+    private async handleError(actionInstance: any, error: unknown): Promise<void> {
+        const message = error instanceof ArtemisApiError ? error.message : String(error);
+        streamDeck.logger.error(`JSON Variable Dial failed: ${message}`);
+        await actionInstance.setFeedback({ title: "Artemis", value: "ERROR" });
+        await actionInstance.showAlert();
     }
 }
 
@@ -96,7 +118,6 @@ function normalizeSettings(settings: JsonVariableDialSettings): Required<JsonVar
     const maximum = maximumRaw > minimum ? maximumRaw : minimum + 100;
     const step = Math.abs(finite(settings.step, 1)) || 1;
     const defaultValue = clamp(finite(settings.defaultValue, minimum), minimum, maximum);
-    const currentValue = clamp(finite(settings.currentValue, defaultValue), minimum, maximum);
     return {
         moduleId: settings.moduleId?.trim() || DEFAULT_MODULE,
         variableName: settings.variableName ?? "",
@@ -105,7 +126,6 @@ function normalizeSettings(settings: JsonVariableDialSettings): Required<JsonVar
         maximum,
         step,
         defaultValue,
-        currentValue,
         suffix: settings.suffix ?? ""
     };
 }

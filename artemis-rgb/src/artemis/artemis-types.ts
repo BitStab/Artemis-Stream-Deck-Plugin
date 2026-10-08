@@ -21,9 +21,20 @@ export interface ArtemisConnectionOptions {
     timeoutMs?: number;
 }
 
+export type ArtemisJsonVariableType = "boolean" | "number" | "integer" | "string";
+
+export interface ArtemisJsonVariable {
+    name: string;
+    title: string;
+    description?: string;
+    type: ArtemisJsonVariableType;
+    minimum?: number;
+    maximum?: number;
+    defaultValue?: boolean | number | string;
+}
+
 export interface ArtemisJsonModule {
     moduleId: string;
     schema: Record<string, unknown>;
+    variables: ArtemisJsonVariable[];
 }
-
-export type ArtemisJsonVariableType = "boolean" | "number" | "string";

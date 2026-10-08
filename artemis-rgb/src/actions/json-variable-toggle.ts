@@ -14,7 +14,6 @@ export type JsonVariableToggleSettings = {
     moduleId?: string;
     variableName?: string;
     label?: string;
-    value?: boolean;
 };
 
 const DEFAULT_MODULE = "streamdeck";
@@ -26,13 +25,11 @@ export class JsonVariableToggle extends SingletonAction<JsonVariableToggleSettin
             await ev.action.setFeedbackLayout("$A1");
             await ev.action.setTriggerDescription({ push: "Toggle Artemis variable" });
         }
-        await this.render(ev.action, ev.payload.settings);
-        await this.sync(ev.action, ev.payload.settings, false);
+        await this.syncFromArtemis(ev.action, ev.payload.settings);
     }
 
     override async onDidReceiveSettings(ev: DidReceiveSettingsEvent<JsonVariableToggleSettings>): Promise<void> {
-        await this.render(ev.action, ev.payload.settings);
-        await this.sync(ev.action, ev.payload.settings, false);
+        await this.syncFromArtemis(ev.action, ev.payload.settings);
     }
 
     override async onKeyDown(ev: KeyDownEvent<JsonVariableToggleSettings>): Promise<void> {
@@ -44,37 +41,41 @@ export class JsonVariableToggle extends SingletonAction<JsonVariableToggleSettin
     }
 
     private async toggle(actionInstance: any, settings: JsonVariableToggleSettings): Promise<void> {
-        const next = !(settings.value ?? false);
-        const nextSettings = { ...settings, value: next };
-        await actionInstance.setSettings(nextSettings);
-        await this.sync(actionInstance, nextSettings, true);
-    }
-
-    private async sync(actionInstance: any, settings: JsonVariableToggleSettings, feedback: boolean): Promise<void> {
+        const moduleId = settings.moduleId?.trim() || DEFAULT_MODULE;
         const variableName = settings.variableName?.trim();
-        if (!variableName) {
-            await this.renderMissing(actionInstance);
-            return;
-        }
+        if (!variableName) return this.renderMissing(actionInstance);
+
         try {
             const client = new ArtemisClient(await getArtemisConnectionOptions());
-            await client.setJsonVariable(
-                settings.moduleId?.trim() || DEFAULT_MODULE,
-                variableName,
-                "boolean",
-                settings.value ?? false,
-                { title: settings.label?.trim() || undefined }
-            );
-            await this.render(actionInstance, settings);
-            if (feedback && actionInstance.isKey()) await actionInstance.showOk();
+            await client.ensureJsonVariable(moduleId, variableName, "boolean", { title: settings.label?.trim() || undefined });
+            const current = await client.tryGetJsonVariableValue(moduleId, variableName);
+            const next = !(typeof current === "boolean" ? current : false);
+            await client.setJsonModuleData(moduleId, { [variableName]: next });
+            await this.render(actionInstance, settings, next);
+            if (actionInstance.isKey()) await actionInstance.showOk();
         } catch (error) {
             await this.handleError(actionInstance, error);
         }
     }
 
-    private async render(actionInstance: any, settings: JsonVariableToggleSettings): Promise<void> {
+    private async syncFromArtemis(actionInstance: any, settings: JsonVariableToggleSettings): Promise<void> {
+        const moduleId = settings.moduleId?.trim() || DEFAULT_MODULE;
+        const variableName = settings.variableName?.trim();
+        if (!variableName) return this.renderMissing(actionInstance);
+
+        try {
+            const client = new ArtemisClient(await getArtemisConnectionOptions());
+            await client.ensureJsonVariable(moduleId, variableName, "boolean", { title: settings.label?.trim() || undefined });
+            const current = await client.tryGetJsonVariableValue(moduleId, variableName);
+            await this.render(actionInstance, settings, typeof current === "boolean" ? current : false);
+        } catch (error) {
+            await this.handleError(actionInstance, error);
+        }
+    }
+
+    private async render(actionInstance: any, settings: JsonVariableToggleSettings, value: boolean): Promise<void> {
         const label = settings.label?.trim() || settings.variableName?.trim() || "Variable";
-        const state = settings.value ? "ON" : "OFF";
+        const state = value ? "ON" : "OFF";
         if (actionInstance.isKey()) await actionInstance.setTitle(`${truncate(label, 14)}\n${state}`);
         else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: truncate(label, 20), value: state });
     }
