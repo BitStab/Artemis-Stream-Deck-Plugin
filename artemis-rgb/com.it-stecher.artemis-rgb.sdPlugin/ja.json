@@ -24,5 +24,36 @@
         "Push": "切り替え / リセット"
       }
     }
+  },
+  "Localization": {
+    "common": {
+      "profile": "プロファイル",
+      "variable": "変数",
+      "select": "選択",
+      "set": "設定",
+      "on": "オン",
+      "off": "オフ",
+      "offline": "オフライン",
+      "error": "エラー",
+      "not_found": "見つかりません"
+    },
+    "profile": {
+      "loaded": "読込済み",
+      "press_to_load": "押して読込",
+      "select_profile": "プロファイル選択",
+      "no_profiles": "プロファイルなし",
+      "trigger": {
+        "rotate": "Artemisプロファイルを選択",
+        "push": "選択したプロファイルを読込"
+      }
+    },
+    "variable": {
+      "dial": "Artemisダイヤル",
+      "set_variable": "変数を設定",
+      "trigger": {
+        "rotate": "Artemis変数を調整",
+        "push": "切替 / リセット"
+      }
+    }
   }
 }

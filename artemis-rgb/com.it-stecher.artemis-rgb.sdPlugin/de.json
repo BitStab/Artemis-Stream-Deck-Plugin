@@ -24,5 +24,36 @@
         "Push": "Umschalten / zurücksetzen"
       }
     }
+  },
+  "Localization": {
+    "common": {
+      "profile": "Profil",
+      "variable": "Variable",
+      "select": "Wählen",
+      "set": "Setzen",
+      "on": "EIN",
+      "off": "AUS",
+      "offline": "OFFLINE",
+      "error": "FEHLER",
+      "not_found": "Nicht gefunden"
+    },
+    "profile": {
+      "loaded": "GELADEN",
+      "press_to_load": "Drücken zum Laden",
+      "select_profile": "Profil auswählen",
+      "no_profiles": "Keine Profile",
+      "trigger": {
+        "rotate": "Artemis-Profil auswählen",
+        "push": "Ausgewähltes Profil laden"
+      }
+    },
+    "variable": {
+      "dial": "Artemis-Dial",
+      "set_variable": "Variable wählen",
+      "trigger": {
+        "rotate": "Artemis-Variable anpassen",
+        "push": "Umschalten / zurücksetzen"
+      }
+    }
   }
 }

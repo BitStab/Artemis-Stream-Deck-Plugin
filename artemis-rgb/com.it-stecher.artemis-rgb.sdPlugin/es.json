@@ -24,5 +24,36 @@
         "Push": "Alternar / restablecer"
       }
     }
+  },
+  "Localization": {
+    "common": {
+      "profile": "Perfil",
+      "variable": "Variable",
+      "select": "Elegir",
+      "set": "Definir",
+      "on": "ON",
+      "off": "OFF",
+      "offline": "SIN CONEXIÓN",
+      "error": "ERROR",
+      "not_found": "No encontrado"
+    },
+    "profile": {
+      "loaded": "CARGADO",
+      "press_to_load": "Pulsa para cargar",
+      "select_profile": "Seleccionar perfil",
+      "no_profiles": "Sin perfiles",
+      "trigger": {
+        "rotate": "Seleccionar perfil Artemis",
+        "push": "Cargar perfil seleccionado"
+      }
+    },
+    "variable": {
+      "dial": "Dial Artemis",
+      "set_variable": "Definir variable",
+      "trigger": {
+        "rotate": "Ajustar variable Artemis",
+        "push": "Alternar / restablecer"
+      }
+    }
   }
 }

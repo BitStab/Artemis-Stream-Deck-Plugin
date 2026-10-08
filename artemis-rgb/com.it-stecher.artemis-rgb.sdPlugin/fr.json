@@ -24,5 +24,36 @@
         "Push": "Basculer / réinitialiser"
       }
     }
+  },
+  "Localization": {
+    "common": {
+      "profile": "Profil",
+      "variable": "Variable",
+      "select": "Choisir",
+      "set": "Définir",
+      "on": "ON",
+      "off": "OFF",
+      "offline": "HORS LIGNE",
+      "error": "ERREUR",
+      "not_found": "Introuvable"
+    },
+    "profile": {
+      "loaded": "CHARGÉ",
+      "press_to_load": "Appuyer pour charger",
+      "select_profile": "Sélectionner profil",
+      "no_profiles": "Aucun profil",
+      "trigger": {
+        "rotate": "Sélectionner le profil Artemis",
+        "push": "Charger le profil sélectionné"
+      }
+    },
+    "variable": {
+      "dial": "Molette Artemis",
+      "set_variable": "Définir variable",
+      "trigger": {
+        "rotate": "Ajuster la variable Artemis",
+        "push": "Basculer / réinitialiser"
+      }
+    }
   }
 }

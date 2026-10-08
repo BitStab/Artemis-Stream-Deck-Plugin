@@ -10,6 +10,7 @@ import streamDeck, {
 import { ArtemisApiError, ArtemisClient } from "../artemis/artemis-client";
 import { getArtemisConnectionOptions, getVariableState, setVariableState } from "../artemis/artemis-settings";
 import type { ArtemisControllableVariableType, ArtemisScalarValue } from "../artemis/artemis-types";
+import { t } from "../i18n";
 
 export type JsonVariableDialSettings = {
     moduleId?: string;
@@ -34,7 +35,7 @@ export class JsonVariableDial extends SingletonAction<JsonVariableDialSettings> 
     override async onWillAppear(ev: WillAppearEvent<JsonVariableDialSettings>): Promise<void> {
         if (ev.action.isDial()) {
             await ev.action.setFeedbackLayout("$A1");
-            await ev.action.setTriggerDescription({ rotate: "Adjust Artemis variable", push: "Toggle / reset" });
+            await ev.action.setTriggerDescription({ rotate: t("variable.trigger.rotate"), push: t("variable.trigger.push") });
         }
         await this.sync(ev.action, ev.payload.settings);
     }
@@ -53,10 +54,10 @@ export class JsonVariableDial extends SingletonAction<JsonVariableDialSettings> 
         // Show feedback immediately, before any Artemis/network work. If this appears,
         // Stream Deck is definitely delivering dialRotate events to the action.
         if (ev.action.isDial()) {
-            const label = settings.label || settings.variableName || "Artemis Dial";
+            const label = settings.label || settings.variableName || t("variable.dial");
             await ev.action.setFeedback({
                 title: truncate(label, 20),
-                value: `tick ${ticks > 0 ? "+" : ""}${ticks}`
+                value: `Δ ${ticks > 0 ? "+" : ""}${ticks}`
             });
         }
 
@@ -175,19 +176,19 @@ export class JsonVariableDial extends SingletonAction<JsonVariableDialSettings> 
 
     private async render(actionInstance: any, settings: Required<JsonVariableDialSettings>, type: ArtemisControllableVariableType, value: ArtemisScalarValue): Promise<void> {
         const label = settings.label || settings.variableName || "Variable";
-        let display = type === "boolean" ? (value ? "ON" : "OFF") : String(value);
+        let display = type === "boolean" ? (value ? t("common.on") : t("common.off")) : String(value);
         if (type === "number" || type === "integer") display += settings.suffix;
         await actionInstance.setFeedback({ title: truncate(label, 20), value: truncate(display, 22) });
     }
 
     private async renderMissing(actionInstance: any): Promise<void> {
-        await actionInstance.setFeedback({ title: "Artemis", value: "Set variable" });
+        await actionInstance.setFeedback({ title: "Artemis", value: t("variable.set_variable") });
     }
 
     private async handleError(actionInstance: any, error: unknown): Promise<void> {
         const message = error instanceof ArtemisApiError ? error.message : String(error);
         streamDeck.logger.error(`Variable Dial failed: ${message}`);
-        await actionInstance.setFeedback({ title: "Artemis", value: "ERROR" });
+        await actionInstance.setFeedback({ title: "Artemis", value: t("common.error") });
         await actionInstance.showAlert();
     }
 }

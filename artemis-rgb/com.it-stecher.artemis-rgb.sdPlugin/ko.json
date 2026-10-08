@@ -24,5 +24,36 @@
         "Push": "전환 / 재설정"
       }
     }
+  },
+  "Localization": {
+    "common": {
+      "profile": "프로필",
+      "variable": "변수",
+      "select": "선택",
+      "set": "설정",
+      "on": "켜짐",
+      "off": "꺼짐",
+      "offline": "오프라인",
+      "error": "오류",
+      "not_found": "찾을 수 없음"
+    },
+    "profile": {
+      "loaded": "불러옴",
+      "press_to_load": "눌러서 불러오기",
+      "select_profile": "프로필 선택",
+      "no_profiles": "프로필 없음",
+      "trigger": {
+        "rotate": "Artemis 프로필 선택",
+        "push": "선택한 프로필 불러오기"
+      }
+    },
+    "variable": {
+      "dial": "Artemis 다이얼",
+      "set_variable": "변수 설정",
+      "trigger": {
+        "rotate": "Artemis 변수 조정",
+        "push": "전환 / 재설정"
+      }
+    }
   }
 }

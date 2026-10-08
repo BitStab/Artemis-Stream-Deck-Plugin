@@ -11,6 +11,7 @@ import streamDeck, {
 import { ArtemisApiError, ArtemisClient } from "../artemis/artemis-client";
 import { getArtemisConnectionOptions } from "../artemis/artemis-settings";
 import type { ArtemisProfile } from "../artemis/artemis-types";
+import { t } from "../i18n";
 
 export type ProfileSelectSettings = {
     profileId?: string;
@@ -23,8 +24,8 @@ export class ProfileToggle extends SingletonAction<ProfileSelectSettings> {
         if (ev.action.isDial()) {
             await ev.action.setFeedbackLayout("$A1");
             await ev.action.setTriggerDescription({
-                rotate: "Select Artemis profile",
-                push: "Load selected profile"
+                rotate: t("profile.trigger.rotate"),
+                push: t("profile.trigger.push")
             });
         }
         await this.refresh(ev.action, ev.payload.settings);
@@ -47,7 +48,7 @@ export class ProfileToggle extends SingletonAction<ProfileSelectSettings> {
             const client = new ArtemisClient(await getArtemisConnectionOptions());
             const profiles = sortProfiles(await client.getProfiles());
             if (!profiles.length) {
-                await ev.action.setFeedback({ title: "Artemis", value: "No profiles" });
+                await ev.action.setFeedback({ title: "Artemis", value: t("profile.no_profiles") });
                 await ev.action.showAlert();
                 return;
             }
@@ -90,8 +91,8 @@ export class ProfileToggle extends SingletonAction<ProfileSelectSettings> {
             const client = new ArtemisClient(await getArtemisConnectionOptions());
             const profile = await client.getProfile(settings.profileId);
             if (!profile) {
-                if (actionInstance.isKey()) await actionInstance.setTitle(`${settings.profileName ?? "Profile"}\nNOT FOUND`);
-                else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: "Not found" });
+                if (actionInstance.isKey()) await actionInstance.setTitle(`${settings.profileName ?? t("common.profile")}\n${t("common.not_found")}`);
+                else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: t("common.not_found") });
                 return;
             }
             await this.renderSelection(actionInstance, profile, profile.isActive);
@@ -102,25 +103,25 @@ export class ProfileToggle extends SingletonAction<ProfileSelectSettings> {
 
     private async renderSelection(actionInstance: any, profile: ArtemisProfile, loaded: boolean): Promise<void> {
         if (actionInstance.isKey()) {
-            await actionInstance.setTitle(`${truncate(profile.name, 16)}${loaded ? "\nLOADED" : ""}`);
+            await actionInstance.setTitle(`${truncate(profile.name, 16)}${loaded ? `\n${t("profile.loaded")}` : ""}`);
         } else if (actionInstance.isDial()) {
             await actionInstance.setFeedback({
                 title: truncate(profile.name, 20),
-                value: loaded ? "LOADED" : "Press to load"
+                value: loaded ? t("profile.loaded") : t("profile.press_to_load")
             });
         }
     }
 
     private async renderMissing(actionInstance: any): Promise<void> {
-        if (actionInstance.isKey()) await actionInstance.setTitle("Select\nProfile");
-        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: "Select profile" });
+        if (actionInstance.isKey()) await actionInstance.setTitle(`${t("common.select")}\n${t("common.profile")}`);
+        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: t("profile.select_profile") });
     }
 
     private async handleError(actionInstance: any, error: unknown): Promise<void> {
         const message = error instanceof ArtemisApiError ? error.message : String(error);
         streamDeck.logger.error(`Profile Select failed: ${message}`);
-        if (actionInstance.isKey()) await actionInstance.setTitle("Artemis\nOFFLINE");
-        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: "OFFLINE" });
+        if (actionInstance.isKey()) await actionInstance.setTitle(`Artemis\n${t("common.offline")}`);
+        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: t("common.offline") });
         await actionInstance.showAlert();
     }
 }

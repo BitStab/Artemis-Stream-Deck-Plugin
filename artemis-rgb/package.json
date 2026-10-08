@@ -19,5 +19,5 @@
   "dependencies": {
     "@elgato/streamdeck": "^3.0.0"
   },
-  "version": "0.5.8"
+  "version": "0.6.6"
 }

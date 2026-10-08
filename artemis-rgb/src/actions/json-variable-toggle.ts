@@ -10,6 +10,7 @@ import streamDeck, {
 import { ArtemisApiError, ArtemisClient } from "../artemis/artemis-client";
 import { getArtemisConnectionOptions, getVariableState, setVariableState } from "../artemis/artemis-settings";
 import type { ArtemisControllableVariableType, ArtemisScalarValue } from "../artemis/artemis-types";
+import { t } from "../i18n";
 
 export type JsonVariableButtonSettings = {
     moduleId?: string;
@@ -109,22 +110,22 @@ export class JsonVariableToggle extends SingletonAction<JsonVariableButtonSettin
     }
 
     private async render(actionInstance: any, settings: Required<JsonVariableButtonSettings>, type: ArtemisControllableVariableType, value: ArtemisScalarValue): Promise<void> {
-        const label = settings.label || settings.variableName || "Variable";
-        const display = type === "boolean" ? (value ? "ON" : "OFF") : `${String(value)}${type === "number" || type === "integer" ? settings.suffix : ""}`;
+        const label = settings.label || settings.variableName || t("common.variable");
+        const display = type === "boolean" ? (value ? t("common.on") : t("common.off")) : `${String(value)}${type === "number" || type === "integer" ? settings.suffix : ""}`;
         if (actionInstance.isKey()) await actionInstance.setTitle(`${truncate(label, 14)}\n${truncate(display, 14)}`);
         else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: truncate(label, 20), value: truncate(display, 20) });
     }
 
     private async renderMissing(actionInstance: any): Promise<void> {
-        if (actionInstance.isKey()) await actionInstance.setTitle("Set\nVariable");
-        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: "Set variable" });
+        if (actionInstance.isKey()) await actionInstance.setTitle(`${t("common.set")}\n${t("common.variable")}`);
+        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: t("variable.set_variable") });
     }
 
     private async handleError(actionInstance: any, error: unknown): Promise<void> {
         const message = error instanceof ArtemisApiError ? error.message : String(error);
         streamDeck.logger.error(`Variable Button failed: ${message}`);
-        if (actionInstance.isKey()) await actionInstance.setTitle("Artemis\nERROR");
-        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: "ERROR" });
+        if (actionInstance.isKey()) await actionInstance.setTitle(`Artemis\n${t("common.error")}`);
+        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: t("common.error") });
         await actionInstance.showAlert();
     }
 }

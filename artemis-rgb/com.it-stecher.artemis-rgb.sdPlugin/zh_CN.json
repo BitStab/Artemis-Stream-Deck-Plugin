@@ -24,5 +24,36 @@
         "Push": "切换 / 重置"
       }
     }
+  },
+  "Localization": {
+    "common": {
+      "profile": "配置文件",
+      "variable": "变量",
+      "select": "选择",
+      "set": "设置",
+      "on": "开",
+      "off": "关",
+      "offline": "离线",
+      "error": "错误",
+      "not_found": "未找到"
+    },
+    "profile": {
+      "loaded": "已加载",
+      "press_to_load": "按下加载",
+      "select_profile": "选择配置文件",
+      "no_profiles": "无配置文件",
+      "trigger": {
+        "rotate": "选择 Artemis 配置文件",
+        "push": "加载所选配置文件"
+      }
+    },
+    "variable": {
+      "dial": "Artemis 旋钮",
+      "set_variable": "设置变量",
+      "trigger": {
+        "rotate": "调整 Artemis 变量",
+        "push": "切换 / 重置"
+      }
+    }
   }
 }
