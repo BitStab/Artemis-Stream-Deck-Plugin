@@ -1,6 +1,6 @@
 {
   "Name": "Artemis-RGB",
-  "Version": "0.4.0.0",
+  "Version": "0.5.0.0",
   "Author": "IT-Stecher",
   "Actions": [
     {
@@ -28,10 +28,10 @@
       }
     },
     {
-      "Name": "JSON Variable Toggle",
+      "Name": "Variable Button",
       "UUID": "com.it-stecher.artemis-rgb.json-variable-toggle",
       "Icon": "imgs/actions/json-toggle/icon",
-      "Tooltip": "Toggle a boolean variable in Artemis JSON Modules.",
+      "Tooltip": "Control boolean, number, integer or string variables in Artemis JSON Modules.",
       "PropertyInspectorPath": "ui/json-variable-toggle.html",
       "Controllers": [
         "Keypad",
@@ -46,15 +46,15 @@
       "Encoder": {
         "layout": "$A1",
         "TriggerDescription": {
-          "Push": "Toggle Artemis variable"
+          "Push": "Apply Artemis variable"
         }
       }
     },
     {
-      "Name": "JSON Variable Dial",
+      "Name": "Variable Dial",
       "UUID": "com.it-stecher.artemis-rgb.json-variable-dial",
       "Icon": "imgs/actions/json-dial/icon",
-      "Tooltip": "Control a numeric Artemis JSON Module variable with a Stream Deck+ dial.",
+      "Tooltip": "Control boolean, numeric and string/enum Artemis JSON Module variables with a Stream Deck+ dial.",
       "PropertyInspectorPath": "ui/json-variable-dial.html",
       "Controllers": [
         "Encoder"
@@ -63,7 +63,7 @@
         "layout": "$A1",
         "TriggerDescription": {
           "Rotate": "Adjust Artemis variable",
-          "Push": "Reset to default"
+          "Push": "Toggle / reset"
         }
       }
     }

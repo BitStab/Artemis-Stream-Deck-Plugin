@@ -4,7 +4,8 @@ import type {
     ArtemisProfileCategory,
     ArtemisJsonModule,
     ArtemisJsonVariable,
-    ArtemisJsonVariableType
+    ArtemisJsonVariableType,
+    ArtemisScalarValue
 } from "./artemis-types";
 
 export class ArtemisApiError extends Error {
@@ -98,37 +99,18 @@ export class ArtemisClient {
         return raw.map((item, index) => normalizeJsonModule(item, index));
     }
 
-    async getDataModel(): Promise<unknown> {
-        return this.requestJson<unknown>("data-model");
-    }
-
-    async getJsonVariableValue(moduleId: string, variableName: string): Promise<unknown> {
-        const dataModel = await this.getDataModel();
-        const module = findNamedObject(dataModel, moduleId.trim());
-        if (!module) {
-            throw new ArtemisApiError(`JSON module '${moduleId}' was not found in the Artemis data model`);
-        }
-        const entry = findPropertyCaseInsensitive(module, variableName.trim());
-        if (!entry.found) {
-            throw new ArtemisApiError(`Variable '${variableName}' was not found in JSON module '${moduleId}'`);
-        }
-        return entry.value;
-    }
-
-    async tryGetJsonVariableValue(moduleId: string, variableName: string): Promise<unknown | undefined> {
-        try {
-            return await this.getJsonVariableValue(moduleId, variableName);
-        } catch (error) {
-            if (error instanceof ArtemisApiError) return undefined;
-            throw error;
-        }
+    async getJsonVariableDefinition(moduleId: string, variableName: string): Promise<ArtemisJsonVariable | undefined> {
+        const modules = await this.getJsonModules();
+        return modules
+            .find((module) => module.moduleId.toLowerCase() === moduleId.trim().toLowerCase())
+            ?.variables.find((variable) => variable.name.toLowerCase() === variableName.trim().toLowerCase());
     }
 
     async ensureJsonVariable(
         moduleId: string,
         variableName: string,
         type: ArtemisJsonVariableType,
-        options: { title?: string; description?: string; minimum?: number; maximum?: number } = {}
+        options: { title?: string; description?: string; minimum?: number; maximum?: number; enumValues?: ArtemisScalarValue[]; defaultValue?: ArtemisScalarValue } = {}
     ): Promise<void> {
         const safeModuleId = moduleId.trim();
         const safeVariableName = variableName.trim();
@@ -151,10 +133,12 @@ export class ArtemisClient {
                 title: options.title || humanize(safeVariableName)
             };
             if (options.description) property.description = options.description;
-            if (type === "number") {
+            if (type === "number" || type === "integer") {
                 if (Number.isFinite(options.minimum)) property.minimum = options.minimum;
                 if (Number.isFinite(options.maximum)) property.maximum = options.maximum;
             }
+            if (options.enumValues?.length) property.enum = options.enumValues;
+            if (options.defaultValue !== undefined) property.default = options.defaultValue;
             properties[safeVariableName] = property;
             schema.properties = properties;
             await this.request(`json-modules/${encodeURIComponent(safeModuleId)}/schema`, {
@@ -178,7 +162,7 @@ export class ArtemisClient {
         variableName: string,
         type: ArtemisJsonVariableType,
         value: boolean | number | string,
-        options: { title?: string; description?: string; minimum?: number; maximum?: number } = {}
+        options: { title?: string; description?: string; minimum?: number; maximum?: number; enumValues?: ArtemisScalarValue[]; defaultValue?: ArtemisScalarValue } = {}
     ): Promise<void> {
         await this.ensureJsonVariable(moduleId, variableName, type, options);
         await this.setJsonModuleData(moduleId, { [variableName]: value });
@@ -281,7 +265,7 @@ function extractJsonVariables(schema: Record<string, unknown>): ArtemisJsonVaria
     for (const [name, value] of Object.entries(properties)) {
         if (!isRecord(value)) continue;
         const rawType = text(value.type ?? value.Type).toLowerCase();
-        if (rawType !== "boolean" && rawType !== "number" && rawType !== "integer" && rawType !== "string") continue;
+        if (rawType !== "boolean" && rawType !== "number" && rawType !== "integer" && rawType !== "string" && rawType !== "array" && rawType !== "object") continue;
         const variable: ArtemisJsonVariable = {
             name,
             title: text(value.title ?? value.Title) || humanize(name),
@@ -297,44 +281,13 @@ function extractJsonVariables(schema: Record<string, unknown>): ArtemisJsonVaria
         if (typeof defaultValue === "boolean" || typeof defaultValue === "string" || typeof defaultValue === "number") {
             variable.defaultValue = defaultValue;
         }
+        const enumRaw = value.enum ?? value.Enum;
+        if (Array.isArray(enumRaw)) {
+            variable.enumValues = enumRaw.filter((item): item is ArtemisScalarValue => typeof item === "boolean" || typeof item === "string" || typeof item === "number");
+        }
         result.push(variable);
     }
     return result.sort((a, b) => a.title.localeCompare(b.title));
-}
-
-function findNamedObject(root: unknown, name: string): UnknownRecord | undefined {
-    const wanted = name.toLowerCase();
-    const seen = new Set<object>();
-    const visit = (value: unknown): UnknownRecord | undefined => {
-        if (value === null || typeof value !== "object") return undefined;
-        if (seen.has(value as object)) return undefined;
-        seen.add(value as object);
-        if (Array.isArray(value)) {
-            for (const child of value) {
-                const found = visit(child);
-                if (found) return found;
-            }
-            return undefined;
-        }
-        const record = value as UnknownRecord;
-        for (const [key, child] of Object.entries(record)) {
-            if (key.toLowerCase() === wanted && isRecord(child)) return child;
-        }
-        for (const child of Object.values(record)) {
-            const found = visit(child);
-            if (found) return found;
-        }
-        return undefined;
-    };
-    return visit(root);
-}
-
-function findPropertyCaseInsensitive(record: UnknownRecord, name: string): { found: boolean; value?: unknown } {
-    const wanted = name.toLowerCase();
-    for (const [key, value] of Object.entries(record)) {
-        if (key.toLowerCase() === wanted) return { found: true, value };
-    }
-    return { found: false };
 }
 
 function humanize(value: string): string {

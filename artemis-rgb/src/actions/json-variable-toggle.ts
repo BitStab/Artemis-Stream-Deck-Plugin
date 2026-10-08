@@ -8,76 +8,98 @@ import streamDeck, {
 } from "@elgato/streamdeck";
 
 import { ArtemisApiError, ArtemisClient } from "../artemis/artemis-client";
-import { getArtemisConnectionOptions } from "../artemis/artemis-settings";
+import { getArtemisConnectionOptions, getVariableState, setVariableState } from "../artemis/artemis-settings";
+import type { ArtemisControllableVariableType, ArtemisScalarValue } from "../artemis/artemis-types";
 
-export type JsonVariableToggleSettings = {
+export type JsonVariableButtonSettings = {
     moduleId?: string;
     variableName?: string;
+    variableType?: ArtemisControllableVariableType;
     label?: string;
+    setValue?: ArtemisScalarValue;
+    defaultValue?: ArtemisScalarValue;
+    enumValues?: ArtemisScalarValue[];
 };
 
 const DEFAULT_MODULE = "streamdeck";
 
 @action({ UUID: "com.it-stecher.artemis-rgb.json-variable-toggle" })
-export class JsonVariableToggle extends SingletonAction<JsonVariableToggleSettings> {
-    override async onWillAppear(ev: WillAppearEvent<JsonVariableToggleSettings>): Promise<void> {
+export class JsonVariableToggle extends SingletonAction<JsonVariableButtonSettings> {
+    override async onWillAppear(ev: WillAppearEvent<JsonVariableButtonSettings>): Promise<void> {
         if (ev.action.isDial()) {
             await ev.action.setFeedbackLayout("$A1");
-            await ev.action.setTriggerDescription({ push: "Toggle Artemis variable" });
+            await ev.action.setTriggerDescription({ push: "Apply Artemis variable" });
         }
-        await this.syncFromArtemis(ev.action, ev.payload.settings);
+        await this.sync(ev.action, ev.payload.settings);
     }
 
-    override async onDidReceiveSettings(ev: DidReceiveSettingsEvent<JsonVariableToggleSettings>): Promise<void> {
-        await this.syncFromArtemis(ev.action, ev.payload.settings);
+    override async onDidReceiveSettings(ev: DidReceiveSettingsEvent<JsonVariableButtonSettings>): Promise<void> {
+        await this.sync(ev.action, ev.payload.settings);
     }
 
-    override async onKeyDown(ev: KeyDownEvent<JsonVariableToggleSettings>): Promise<void> {
-        await this.toggle(ev.action, ev.payload.settings);
+    override async onKeyDown(ev: KeyDownEvent<JsonVariableButtonSettings>): Promise<void> {
+        await this.apply(ev.action, ev.payload.settings);
     }
 
-    override async onDialDown(ev: DialDownEvent<JsonVariableToggleSettings>): Promise<void> {
-        await this.toggle(ev.action, ev.payload.settings);
+    override async onDialDown(ev: DialDownEvent<JsonVariableButtonSettings>): Promise<void> {
+        await this.apply(ev.action, ev.payload.settings);
     }
 
-    private async toggle(actionInstance: any, settings: JsonVariableToggleSettings): Promise<void> {
-        const moduleId = settings.moduleId?.trim() || DEFAULT_MODULE;
-        const variableName = settings.variableName?.trim();
-        if (!variableName) return this.renderMissing(actionInstance);
-
+    private async apply(actionInstance: any, raw: JsonVariableButtonSettings): Promise<void> {
+        const settings = normalizeSettings(raw);
+        if (!settings.variableName) return this.renderMissing(actionInstance);
         try {
             const client = new ArtemisClient(await getArtemisConnectionOptions());
-            await client.ensureJsonVariable(moduleId, variableName, "boolean", { title: settings.label?.trim() || undefined });
-            const current = await client.tryGetJsonVariableValue(moduleId, variableName);
-            const next = !(typeof current === "boolean" ? current : false);
-            await client.setJsonModuleData(moduleId, { [variableName]: next });
-            await this.render(actionInstance, settings, next);
+            const definition = await client.getJsonVariableDefinition(settings.moduleId, settings.variableName);
+            const type = definition?.type === "boolean" || definition?.type === "number" || definition?.type === "integer" || definition?.type === "string"
+                ? definition.type : settings.variableType;
+            const fallback = defaultFor(type, definition?.defaultValue ?? settings.defaultValue);
+            const current = coerceValue(type, await getVariableState(settings.moduleId, settings.variableName), fallback);
+            const next = type === "boolean" ? !Boolean(current) : coerceValue(type, settings.setValue, fallback);
+            await client.ensureJsonVariable(settings.moduleId, settings.variableName, type, {
+                title: settings.label || definition?.title,
+                enumValues: settings.enumValues?.length ? settings.enumValues : definition?.enumValues,
+                defaultValue: fallback
+            });
+            await client.setJsonModuleData(settings.moduleId, { [settings.variableName]: next });
+            await setVariableState(settings.moduleId, settings.variableName, next);
+            await this.render(actionInstance, settings, type, next);
             if (actionInstance.isKey()) await actionInstance.showOk();
         } catch (error) {
             await this.handleError(actionInstance, error);
         }
     }
 
-    private async syncFromArtemis(actionInstance: any, settings: JsonVariableToggleSettings): Promise<void> {
-        const moduleId = settings.moduleId?.trim() || DEFAULT_MODULE;
-        const variableName = settings.variableName?.trim();
-        if (!variableName) return this.renderMissing(actionInstance);
-
+    private async sync(actionInstance: any, raw: JsonVariableButtonSettings): Promise<void> {
+        const settings = normalizeSettings(raw);
+        if (!settings.variableName) return this.renderMissing(actionInstance);
         try {
             const client = new ArtemisClient(await getArtemisConnectionOptions());
-            await client.ensureJsonVariable(moduleId, variableName, "boolean", { title: settings.label?.trim() || undefined });
-            const current = await client.tryGetJsonVariableValue(moduleId, variableName);
-            await this.render(actionInstance, settings, typeof current === "boolean" ? current : false);
+            const definition = await client.getJsonVariableDefinition(settings.moduleId, settings.variableName);
+            const type = definition?.type === "boolean" || definition?.type === "number" || definition?.type === "integer" || definition?.type === "string"
+                ? definition.type : settings.variableType;
+            const fallback = defaultFor(type, definition?.defaultValue ?? settings.defaultValue);
+            const stored = await getVariableState(settings.moduleId, settings.variableName);
+            const current = coerceValue(type, stored, fallback);
+            await client.ensureJsonVariable(settings.moduleId, settings.variableName, type, {
+                title: settings.label || definition?.title,
+                enumValues: settings.enumValues?.length ? settings.enumValues : definition?.enumValues,
+                defaultValue: fallback
+            });
+            // JSON-module runtime values are write-only through the official API. Re-apply our persisted state.
+            await client.setJsonModuleData(settings.moduleId, { [settings.variableName]: current });
+            await setVariableState(settings.moduleId, settings.variableName, current);
+            await this.render(actionInstance, settings, type, current);
         } catch (error) {
             await this.handleError(actionInstance, error);
         }
     }
 
-    private async render(actionInstance: any, settings: JsonVariableToggleSettings, value: boolean): Promise<void> {
-        const label = settings.label?.trim() || settings.variableName?.trim() || "Variable";
-        const state = value ? "ON" : "OFF";
-        if (actionInstance.isKey()) await actionInstance.setTitle(`${truncate(label, 14)}\n${state}`);
-        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: truncate(label, 20), value: state });
+    private async render(actionInstance: any, settings: Required<JsonVariableButtonSettings>, type: ArtemisControllableVariableType, value: ArtemisScalarValue): Promise<void> {
+        const label = settings.label || settings.variableName || "Variable";
+        const display = type === "boolean" ? (value ? "ON" : "OFF") : String(value);
+        if (actionInstance.isKey()) await actionInstance.setTitle(`${truncate(label, 14)}\n${truncate(display, 14)}`);
+        else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: truncate(label, 20), value: truncate(display, 20) });
     }
 
     private async renderMissing(actionInstance: any): Promise<void> {
@@ -87,11 +109,33 @@ export class JsonVariableToggle extends SingletonAction<JsonVariableToggleSettin
 
     private async handleError(actionInstance: any, error: unknown): Promise<void> {
         const message = error instanceof ArtemisApiError ? error.message : String(error);
-        streamDeck.logger.error(`JSON Variable Toggle failed: ${message}`);
+        streamDeck.logger.error(`Variable Button failed: ${message}`);
         if (actionInstance.isKey()) await actionInstance.setTitle("Artemis\nERROR");
         else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: "Artemis", value: "ERROR" });
         await actionInstance.showAlert();
     }
 }
 
+function normalizeSettings(settings: JsonVariableButtonSettings): Required<JsonVariableButtonSettings> {
+    return {
+        moduleId: settings.moduleId?.trim() || DEFAULT_MODULE,
+        variableName: settings.variableName?.trim() || "",
+        variableType: settings.variableType ?? "boolean",
+        label: settings.label?.trim() || "",
+        setValue: settings.setValue ?? "",
+        defaultValue: settings.defaultValue ?? "",
+        enumValues: settings.enumValues ?? []
+    };
+}
+function defaultFor(type: ArtemisControllableVariableType, value: ArtemisScalarValue | undefined): ArtemisScalarValue {
+    if (value !== undefined && value !== "") return coerceValue(type, value, type === "boolean" ? false : type === "string" ? "" : 0);
+    return type === "boolean" ? false : type === "string" ? "" : 0;
+}
+function coerceValue(type: ArtemisControllableVariableType, value: unknown, fallback: ArtemisScalarValue): ArtemisScalarValue {
+    if (type === "boolean") return typeof value === "boolean" ? value : value === "true" || value === 1 || value === "1" ? true : value === "false" || value === 0 || value === "0" ? false : Boolean(fallback);
+    if (type === "string") return typeof value === "string" ? value : value == null ? String(fallback) : String(value);
+    const n = Number(value);
+    if (!Number.isFinite(n)) return Number(fallback) || 0;
+    return type === "integer" ? Math.round(n) : n;
+}
 function truncate(value: string, max: number): string { return value.length <= max ? value : `${value.slice(0, max - 1)}…`; }

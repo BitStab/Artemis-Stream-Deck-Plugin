@@ -21,7 +21,9 @@ export interface ArtemisConnectionOptions {
     timeoutMs?: number;
 }
 
-export type ArtemisJsonVariableType = "boolean" | "number" | "integer" | "string";
+export type ArtemisJsonVariableType = "boolean" | "number" | "integer" | "string" | "array" | "object";
+export type ArtemisControllableVariableType = "boolean" | "number" | "integer" | "string";
+export type ArtemisScalarValue = boolean | number | string;
 
 export interface ArtemisJsonVariable {
     name: string;
@@ -30,7 +32,8 @@ export interface ArtemisJsonVariable {
     type: ArtemisJsonVariableType;
     minimum?: number;
     maximum?: number;
-    defaultValue?: boolean | number | string;
+    defaultValue?: ArtemisScalarValue;
+    enumValues?: ArtemisScalarValue[];
 }
 
 export interface ArtemisJsonModule {
