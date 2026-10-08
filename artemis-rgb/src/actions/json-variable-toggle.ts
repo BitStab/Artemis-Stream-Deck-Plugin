@@ -16,8 +16,13 @@ export type JsonVariableButtonSettings = {
     variableName?: string;
     variableType?: ArtemisControllableVariableType;
     label?: string;
-    setValue?: ArtemisScalarValue;
+    valueA?: ArtemisScalarValue;
+    valueB?: ArtemisScalarValue;
     defaultValue?: ArtemisScalarValue;
+    minimum?: number;
+    maximum?: number;
+    step?: number;
+    suffix?: string;
     enumValues?: ArtemisScalarValue[];
 };
 
@@ -55,9 +60,13 @@ export class JsonVariableToggle extends SingletonAction<JsonVariableButtonSettin
                 ? definition.type : settings.variableType;
             const fallback = defaultFor(type, definition?.defaultValue ?? settings.defaultValue);
             const current = coerceValue(type, await getVariableState(settings.moduleId, settings.variableName), fallback);
-            const next = type === "boolean" ? !Boolean(current) : coerceValue(type, settings.setValue, fallback);
+            const next = nextButtonValue(type, current, settings.valueA, settings.valueB, fallback);
             await client.ensureJsonVariable(settings.moduleId, settings.variableName, type, {
                 title: settings.label || definition?.title,
+                minimum: type === "number" || type === "integer" ? settings.minimum : undefined,
+                maximum: type === "number" || type === "integer" ? settings.maximum : undefined,
+                step: type === "number" || type === "integer" ? definition?.step : undefined,
+                suffix: type === "number" || type === "integer" ? settings.suffix : undefined,
                 enumValues: settings.enumValues?.length ? settings.enumValues : definition?.enumValues,
                 defaultValue: fallback
             });
@@ -83,6 +92,10 @@ export class JsonVariableToggle extends SingletonAction<JsonVariableButtonSettin
             const current = coerceValue(type, stored, fallback);
             await client.ensureJsonVariable(settings.moduleId, settings.variableName, type, {
                 title: settings.label || definition?.title,
+                minimum: type === "number" || type === "integer" ? settings.minimum : undefined,
+                maximum: type === "number" || type === "integer" ? settings.maximum : undefined,
+                step: type === "number" || type === "integer" ? definition?.step : undefined,
+                suffix: type === "number" || type === "integer" ? settings.suffix : undefined,
                 enumValues: settings.enumValues?.length ? settings.enumValues : definition?.enumValues,
                 defaultValue: fallback
             });
@@ -97,7 +110,7 @@ export class JsonVariableToggle extends SingletonAction<JsonVariableButtonSettin
 
     private async render(actionInstance: any, settings: Required<JsonVariableButtonSettings>, type: ArtemisControllableVariableType, value: ArtemisScalarValue): Promise<void> {
         const label = settings.label || settings.variableName || "Variable";
-        const display = type === "boolean" ? (value ? "ON" : "OFF") : String(value);
+        const display = type === "boolean" ? (value ? "ON" : "OFF") : `${String(value)}${type === "number" || type === "integer" ? settings.suffix : ""}`;
         if (actionInstance.isKey()) await actionInstance.setTitle(`${truncate(label, 14)}\n${truncate(display, 14)}`);
         else if (actionInstance.isDial()) await actionInstance.setFeedback({ title: truncate(label, 20), value: truncate(display, 20) });
     }
@@ -122,11 +135,27 @@ function normalizeSettings(settings: JsonVariableButtonSettings): Required<JsonV
         variableName: settings.variableName?.trim() || "",
         variableType: settings.variableType ?? "boolean",
         label: settings.label?.trim() || "",
-        setValue: settings.setValue ?? "",
+        valueA: settings.valueA ?? (settings as any).setValue ?? "",
+        valueB: settings.valueB ?? "",
         defaultValue: settings.defaultValue ?? "",
+        minimum: finite(settings.minimum, 0),
+        maximum: finite(settings.maximum, 100),
+        step: Math.abs(finite(settings.step, 1)) || 1,
+        suffix: settings.suffix ?? "",
         enumValues: settings.enumValues ?? []
     };
 }
+function nextButtonValue(type: ArtemisControllableVariableType, current: ArtemisScalarValue, rawA: ArtemisScalarValue, rawB: ArtemisScalarValue, fallback: ArtemisScalarValue): ArtemisScalarValue {
+    if (type === "boolean") return !Boolean(current);
+    const a = coerceValue(type, rawA, fallback);
+    const b = coerceValue(type, rawB, fallback);
+    return valuesEqual(type, current, a) ? b : a;
+}
+function valuesEqual(type: ArtemisControllableVariableType, a: ArtemisScalarValue, b: ArtemisScalarValue): boolean {
+    if (type === "number" || type === "integer") return Number(a) === Number(b);
+    return String(a) === String(b);
+}
+
 function defaultFor(type: ArtemisControllableVariableType, value: ArtemisScalarValue | undefined): ArtemisScalarValue {
     if (value !== undefined && value !== "") return coerceValue(type, value, type === "boolean" ? false : type === "string" ? "" : 0);
     return type === "boolean" ? false : type === "string" ? "" : 0;
@@ -138,4 +167,5 @@ function coerceValue(type: ArtemisControllableVariableType, value: unknown, fall
     if (!Number.isFinite(n)) return Number(fallback) || 0;
     return type === "integer" ? Math.round(n) : n;
 }
+function finite(value: unknown, fallback: number): number { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
 function truncate(value: string, max: number): string { return value.length <= max ? value : `${value.slice(0, max - 1)}…`; }

@@ -1,0 +1,28 @@
+{
+  "Name": "Artemis-RGB",
+  "Description": "Stream Deck / Stream Deck+ から Artemis-RGB のプロファイルと変数を制御します。",
+  "com.it-stecher.artemis-rgb.profile-toggle": {
+    "Name": "プロファイル選択",
+    "Tooltip": "Artemis RGB プロファイルを選択して排他的に読み込みます。",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "Artemis プロファイルを選択",
+        "Push": "選択したプロファイルを読み込む"
+      }
+    }
+  },
+  "com.it-stecher.artemis-rgb.json-variable-toggle": {
+    "Name": "変数ボタン",
+    "Tooltip": "Stream Deck キーで Artemis JSON モジュール変数を設定または切り替えます。"
+  },
+  "com.it-stecher.artemis-rgb.json-variable-dial": {
+    "Name": "変数ダイヤル",
+    "Tooltip": "Stream Deck+ ダイヤルで Artemis のブール、数値、文字列/列挙変数を制御します。",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "Artemis 変数を調整",
+        "Push": "切り替え / リセット"
+      }
+    }
+  }
+}

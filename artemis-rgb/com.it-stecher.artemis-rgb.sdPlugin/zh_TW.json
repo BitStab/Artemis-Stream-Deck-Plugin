@@ -1,0 +1,28 @@
+{
+  "Name": "Artemis-RGB",
+  "Description": "透過 Stream Deck 和 Stream Deck+ 控制 Artemis-RGB 設定檔與變數。",
+  "com.it-stecher.artemis-rgb.profile-toggle": {
+    "Name": "選擇設定檔",
+    "Tooltip": "選擇並獨佔載入 Artemis RGB 設定檔。",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "選擇 Artemis 設定檔",
+        "Push": "載入所選設定檔"
+      }
+    }
+  },
+  "com.it-stecher.artemis-rgb.json-variable-toggle": {
+    "Name": "變數按鈕",
+    "Tooltip": "使用 Stream Deck 按鍵設定或切換 Artemis JSON 模組變數。"
+  },
+  "com.it-stecher.artemis-rgb.json-variable-dial": {
+    "Name": "變數旋鈕",
+    "Tooltip": "使用 Stream Deck+ 旋鈕控制 Artemis 布林、數值與字串/列舉變數。",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "調整 Artemis 變數",
+        "Push": "切換 / 重設"
+      }
+    }
+  }
+}

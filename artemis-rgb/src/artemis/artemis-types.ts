@@ -32,6 +32,8 @@ export interface ArtemisJsonVariable {
     type: ArtemisJsonVariableType;
     minimum?: number;
     maximum?: number;
+    step?: number;
+    suffix?: string;
     defaultValue?: ArtemisScalarValue;
     enumValues?: ArtemisScalarValue[];
 }

@@ -1,6 +1,6 @@
 {
   "Name": "Artemis-RGB",
-  "Version": "0.5.0.0",
+  "Version": "0.6.3.0",
   "Author": "IT-Stecher",
   "Actions": [
     {
@@ -8,7 +8,7 @@
       "UUID": "com.it-stecher.artemis-rgb.profile-toggle",
       "Icon": "imgs/actions/profile-select/icon",
       "Tooltip": "Select and exclusively load an Artemis RGB profile.",
-      "PropertyInspectorPath": "ui/profile-toggle.html",
+      "PropertyInspectorPath": "ui/profile-select-v063.html",
       "Controllers": [
         "Keypad",
         "Encoder"
@@ -31,31 +31,24 @@
       "Name": "Variable Button",
       "UUID": "com.it-stecher.artemis-rgb.json-variable-toggle",
       "Icon": "imgs/actions/json-toggle/icon",
-      "Tooltip": "Control boolean, number, integer or string variables in Artemis JSON Modules.",
-      "PropertyInspectorPath": "ui/json-variable-toggle.html",
+      "Tooltip": "Set or toggle Artemis JSON Module variables with a Stream Deck key.",
+      "PropertyInspectorPath": "ui/variable-button-v063.html",
       "Controllers": [
-        "Keypad",
-        "Encoder"
+        "Keypad"
       ],
       "States": [
         {
           "Image": "imgs/actions/json-toggle/key",
           "TitleAlignment": "middle"
         }
-      ],
-      "Encoder": {
-        "layout": "$A1",
-        "TriggerDescription": {
-          "Push": "Apply Artemis variable"
-        }
-      }
+      ]
     },
     {
       "Name": "Variable Dial",
       "UUID": "com.it-stecher.artemis-rgb.json-variable-dial",
       "Icon": "imgs/actions/json-dial/icon",
       "Tooltip": "Control boolean, numeric and string/enum Artemis JSON Module variables with a Stream Deck+ dial.",
-      "PropertyInspectorPath": "ui/json-variable-dial.html",
+      "PropertyInspectorPath": "ui/variable-dial-v063.html",
       "Controllers": [
         "Encoder"
       ],
@@ -64,14 +57,21 @@
         "TriggerDescription": {
           "Rotate": "Adjust Artemis variable",
           "Push": "Toggle / reset"
+        },
+        "Icon": "imgs/actions/json-dial/encoder-icon"
+      },
+      "States": [
+        {
+          "Image": "imgs/actions/json-dial/encoder-icon",
+          "TitleAlignment": "middle"
         }
-      }
+      ]
     }
   ],
   "Category": "Artemis-RGB",
   "CategoryIcon": "imgs/plugin/category-icon",
   "CodePath": "bin/plugin.js",
-  "Description": "Control Artemis-RGB profiles and JSON variables from Stream Deck and Stream Deck+.",
+  "Description": "Control Artemis-RGB profiles and variables from Stream Deck and Stream Deck+.",
   "Icon": "imgs/plugin/marketplace",
   "SDKVersion": 3,
   "Software": {
@@ -91,5 +91,6 @@
     "Version": "24",
     "Debug": "enabled"
   },
-  "UUID": "com.it-stecher.artemis-rgb"
+  "UUID": "com.it-stecher.artemis-rgb",
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json"
 }

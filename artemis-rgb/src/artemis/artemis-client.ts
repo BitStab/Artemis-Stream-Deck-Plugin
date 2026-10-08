@@ -110,7 +110,7 @@ export class ArtemisClient {
         moduleId: string,
         variableName: string,
         type: ArtemisJsonVariableType,
-        options: { title?: string; description?: string; minimum?: number; maximum?: number; enumValues?: ArtemisScalarValue[]; defaultValue?: ArtemisScalarValue } = {}
+        options: { title?: string; description?: string; minimum?: number; maximum?: number; step?: number; suffix?: string; enumValues?: ArtemisScalarValue[]; defaultValue?: ArtemisScalarValue } = {}
     ): Promise<void> {
         const safeModuleId = moduleId.trim();
         const safeVariableName = variableName.trim();
@@ -127,18 +127,39 @@ export class ArtemisClient {
         schema.type = "object";
 
         const properties = isRecord(schema.properties) ? { ...schema.properties } : {};
-        if (!isRecord(properties[safeVariableName])) {
-            const property: Record<string, unknown> = {
-                type,
-                title: options.title || humanize(safeVariableName)
-            };
-            if (options.description) property.description = options.description;
-            if (type === "number" || type === "integer") {
-                if (Number.isFinite(options.minimum)) property.minimum = options.minimum;
-                if (Number.isFinite(options.maximum)) property.maximum = options.maximum;
-            }
-            if (options.enumValues?.length) property.enum = options.enumValues;
-            if (options.defaultValue !== undefined) property.default = options.defaultValue;
+        const currentProperty = isRecord(properties[safeVariableName]) ? properties[safeVariableName] : {};
+        const property: Record<string, unknown> = { ...currentProperty };
+
+        // Keep the schema definition in sync with the Stream Deck action, not only on first creation.
+        property.type = type;
+        property.title = options.title || text(property.title) || humanize(safeVariableName);
+        if (options.description !== undefined) property.description = options.description;
+
+        if (type === "number" || type === "integer") {
+            if (Number.isFinite(options.minimum)) property.minimum = options.minimum;
+            else delete property.minimum;
+            if (Number.isFinite(options.maximum)) property.maximum = options.maximum;
+            else delete property.maximum;
+            if (Number.isFinite(options.step) && Number(options.step) > 0) property.multipleOf = options.step;
+            else delete property.multipleOf;
+            if (options.suffix) property["x-suffix"] = options.suffix;
+            else delete property["x-suffix"];
+        } else {
+            delete property.minimum;
+            delete property.maximum;
+            delete property.multipleOf;
+            delete property["x-suffix"];
+        }
+
+        if (type === "string" && options.enumValues?.length) property.enum = options.enumValues;
+        else delete property.enum;
+
+        if (options.defaultValue !== undefined) property.default = options.defaultValue;
+        else delete property.default;
+
+        const before = JSON.stringify(properties[safeVariableName] ?? null);
+        const after = JSON.stringify(property);
+        if (before !== after || !existing) {
             properties[safeVariableName] = property;
             schema.properties = properties;
             await this.request(`json-modules/${encodeURIComponent(safeModuleId)}/schema`, {
@@ -162,7 +183,7 @@ export class ArtemisClient {
         variableName: string,
         type: ArtemisJsonVariableType,
         value: boolean | number | string,
-        options: { title?: string; description?: string; minimum?: number; maximum?: number; enumValues?: ArtemisScalarValue[]; defaultValue?: ArtemisScalarValue } = {}
+        options: { title?: string; description?: string; minimum?: number; maximum?: number; step?: number; suffix?: string; enumValues?: ArtemisScalarValue[]; defaultValue?: ArtemisScalarValue } = {}
     ): Promise<void> {
         await this.ensureJsonVariable(moduleId, variableName, type, options);
         await this.setJsonModuleData(moduleId, { [variableName]: value });
@@ -277,6 +298,10 @@ function extractJsonVariables(schema: Record<string, unknown>): ArtemisJsonVaria
         const maximum = Number(value.maximum ?? value.Maximum);
         if (Number.isFinite(minimum)) variable.minimum = minimum;
         if (Number.isFinite(maximum)) variable.maximum = maximum;
+        const step = Number(value.multipleOf ?? value.MultipleOf);
+        if (Number.isFinite(step) && step > 0) variable.step = step;
+        const suffix = text(value["x-suffix"] ?? value["xSuffix"] ?? value.Suffix);
+        if (suffix) variable.suffix = suffix;
         const defaultValue = value.default ?? value.Default;
         if (typeof defaultValue === "boolean" || typeof defaultValue === "string" || typeof defaultValue === "number") {
             variable.defaultValue = defaultValue;

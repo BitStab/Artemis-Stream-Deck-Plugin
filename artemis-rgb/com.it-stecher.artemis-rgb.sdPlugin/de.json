@@ -1,0 +1,28 @@
+{
+  "Name": "Artemis-RGB",
+  "Description": "Artemis-RGB-Profile und Variablen mit Stream Deck und Stream Deck+ steuern.",
+  "com.it-stecher.artemis-rgb.profile-toggle": {
+    "Name": "Profil auswählen",
+    "Tooltip": "Ein Artemis-RGB-Profil auswählen und exklusiv laden.",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "Artemis-Profil auswählen",
+        "Push": "Ausgewähltes Profil laden"
+      }
+    }
+  },
+  "com.it-stecher.artemis-rgb.json-variable-toggle": {
+    "Name": "Variablen-Taste",
+    "Tooltip": "Artemis-JSON-Modulvariablen mit einer Stream-Deck-Taste setzen oder umschalten."
+  },
+  "com.it-stecher.artemis-rgb.json-variable-dial": {
+    "Name": "Variablen-Dial",
+    "Tooltip": "Boolesche, numerische und Text-/Enum-Variablen von Artemis mit einem Stream Deck+ Dial steuern.",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "Artemis-Variable anpassen",
+        "Push": "Umschalten / zurücksetzen"
+      }
+    }
+  }
+}
