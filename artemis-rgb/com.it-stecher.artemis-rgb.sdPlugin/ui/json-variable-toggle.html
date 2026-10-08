@@ -1,0 +1,17 @@
+<!doctype html><html><head lang="en"><meta charset="utf-8"/><title>Artemis Variable Toggle</title><script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script><style>body{padding-bottom:10px}.status{font:12px system-ui,sans-serif;margin:8px 12px;opacity:.85}.ok{color:#73d673}.error{color:#ff7b72}input,select{width:100%;box-sizing:border-box}.row{display:flex;gap:6px;width:100%}.row input:first-child{flex:1}.port{max-width:85px}</style></head><body>
+<sdpi-item label="Protocol"><select id="protocol"><option value="http">HTTP</option><option value="https">HTTPS</option></select></sdpi-item>
+<sdpi-item label="Artemis"><div class="row"><input id="host" placeholder="127.0.0.1"/><input id="port" class="port" type="number" min="1" max="65535" placeholder="9696"/></div></sdpi-item>
+<div id="status" class="status">Checking JSON Modules API…</div>
+<sdpi-item label="Module ID"><input id="moduleId" placeholder="streamdeck"/></sdpi-item>
+<sdpi-item label="Variable"><input id="variableName" placeholder="gamingMode"/></sdpi-item>
+<sdpi-item label="Label"><input id="label" placeholder="Gaming Mode"/></sdpi-item>
+<div class="status">The variable is created automatically in Artemis. Press the key (or dial) to toggle false/true.</div>
+<script>
+const D={protocol:"http",host:"127.0.0.1",port:9696,moduleId:"streamdeck"};let client,s={};const $=id=>document.getElementById(id),protocol=$("protocol"),host=$("host"),port=$("port"),moduleId=$("moduleId"),variableName=$("variableName"),label=$("label"),status=$("status");
+function base(){return`${protocol.value==="https"?"https":"http"}://${host.value.trim()||D.host}:${Number(port.value)||D.port}/`}
+async function globals(){await client.setGlobalSettings({protocol:protocol.value==="https"?"https":"http",host:host.value.trim()||D.host,port:Number(port.value)||D.port});}
+async function check(){try{await globals();const r=await fetch(new URL("json-modules",base()),{headers:{Accept:"application/json"}});if(!r.ok)throw new Error(`HTTP ${r.status}`);status.className="status ok";status.textContent="JSON Modules API available";}catch(e){status.className="status error";status.textContent=`JSON Modules API unavailable: ${e?.message??e}`;}}
+async function save(){s={...s,moduleId:moduleId.value.trim()||D.moduleId,variableName:variableName.value.trim()||undefined,label:label.value.trim()||undefined};await client.setSettings(s);}
+async function init(){client=SDPIComponents.streamDeckClient;const g=await client.getGlobalSettings()||{};const p=await client.getSettings();s=p?.settings??p??{};protocol.value=g.protocol==="https"?"https":D.protocol;host.value=g.host||D.host;port.value=g.port||D.port;moduleId.value=s.moduleId||D.moduleId;variableName.value=s.variableName||"";label.value=s.label||"";await check();}
+[protocol,host,port].forEach(x=>x.addEventListener("change",check));[moduleId,variableName,label].forEach(x=>x.addEventListener("change",save));window.addEventListener("DOMContentLoaded",()=>{const w=setInterval(()=>{if(window.SDPIComponents?.streamDeckClient){clearInterval(w);init();}},50);setTimeout(()=>clearInterval(w),10000);});
+</script></body></html>

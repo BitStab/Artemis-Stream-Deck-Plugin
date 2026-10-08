@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head lang="en">
+    <meta charset="utf-8" />
+    <title>Artemis Profile</title>
+    <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+    <style>
+        body { padding-bottom: 10px; }
+        .status { font: 12px system-ui, sans-serif; margin: 8px 12px; opacity: .85; }
+        .ok { color: #73d673; } .error { color: #ff7b72; }
+        select, input { width: 100%; box-sizing: border-box; }
+        .row { display:flex; gap:6px; width:100%; } .row input:first-child{flex:1}.port{max-width:85px}
+    </style>
+</head>
+<body>
+    <sdpi-item label="Protocol"><select id="protocol"><option value="http">HTTP</option><option value="https">HTTPS</option></select></sdpi-item>
+    <sdpi-item label="Artemis"><div class="row"><input id="host" type="text" placeholder="127.0.0.1"/><input id="port" class="port" type="number" min="1" max="65535" placeholder="9696"/></div></sdpi-item>
+    <div id="status" class="status">Connecting…</div>
+    <sdpi-item label="Profile"><select id="profile"><option value="">Select a profile…</option></select></sdpi-item>
+    <div class="status">Key: press loads this profile exclusively. Stream Deck+: rotate to select, then press to load.</div>
+<script>
+const DEFAULTS={protocol:"http",host:"127.0.0.1",port:9696};
+const protocolEl=document.getElementById("protocol"),hostEl=document.getElementById("host"),portEl=document.getElementById("port"),profileEl=document.getElementById("profile"),statusEl=document.getElementById("status");
+let client,actionSettings={};
+const pick=(o,...keys)=>{for(const k of keys){if(o&&o[k]!==undefined&&o[k]!==null)return o[k];}}; const text=v=>v==null?"":String(v);
+function normalizeProfile(raw,index){const category=pick(raw,"category","Category")||{};return{id:text(pick(raw,"id","Id")),name:text(pick(raw,"name","Name"))||`Profile ${index+1}`,order:Number(pick(raw,"order","Order"))||0,category:{name:text(pick(category,"name","Name"))||"Uncategorized",order:Number(pick(category,"order","Order"))||0}};}
+function baseUrl(){const protocol=protocolEl.value==="https"?"https":"http",host=hostEl.value.trim()||DEFAULTS.host,port=Number(portEl.value)||DEFAULTS.port;return`${protocol}://${host}:${port}/`;}
+async function saveConnection(){await client.setGlobalSettings({protocol:protocolEl.value==="https"?"https":"http",host:hostEl.value.trim()||DEFAULTS.host,port:Number(portEl.value)||DEFAULTS.port});}
+async function loadProfiles(){statusEl.className="status";statusEl.textContent="Connecting to Artemis…";try{await saveConnection();const response=await fetch(new URL("profiles",baseUrl()),{headers:{Accept:"application/json"}});if(!response.ok)throw new Error(`HTTP ${response.status}`);const raw=await response.json();if(!Array.isArray(raw))throw new Error("/profiles did not return an array");const profiles=raw.map(normalizeProfile).filter(p=>p.id).sort((a,b)=>(a.category.order-b.category.order)||(a.order-b.order)||a.name.localeCompare(b.name));profileEl.innerHTML='<option value="">Select a profile…</option>';for(const p of profiles){const o=document.createElement("option");o.value=p.id;o.textContent=`${p.category.name} — ${p.name}`;o.dataset.name=p.name;profileEl.appendChild(o);}if(actionSettings.profileId)profileEl.value=actionSettings.profileId;statusEl.className="status ok";statusEl.textContent=`Connected · ${profiles.length} profiles`;}catch(error){statusEl.className="status error";statusEl.textContent=`Artemis unavailable: ${error?.message??error}`;}}
+async function saveProfile(){const o=profileEl.selectedOptions[0];actionSettings={...actionSettings,profileId:profileEl.value||undefined,profileName:o?.dataset?.name||undefined};await client.setSettings(actionSettings);}
+async function init(){client=SDPIComponents.streamDeckClient;const global=await client.getGlobalSettings()||{};const payload=await client.getSettings();actionSettings=payload?.settings??payload??{};protocolEl.value=global.protocol==="https"?"https":DEFAULTS.protocol;hostEl.value=global.host||DEFAULTS.host;portEl.value=global.port||DEFAULTS.port;await loadProfiles();}
+profileEl.addEventListener("change",saveProfile);protocolEl.addEventListener("change",loadProfiles);hostEl.addEventListener("change",loadProfiles);portEl.addEventListener("change",loadProfiles);
+window.addEventListener("DOMContentLoaded",()=>{const wait=setInterval(()=>{if(window.SDPIComponents?.streamDeckClient){clearInterval(wait);init().catch(e=>{statusEl.className="status error";statusEl.textContent=e?.message??e;});}},50);setTimeout(()=>clearInterval(wait),10000);});
+</script></body></html>

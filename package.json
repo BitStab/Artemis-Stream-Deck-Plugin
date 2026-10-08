@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@elgato/streamdeck": "^3.0.1"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "Name": "Artemis-RGB",
+  "Version": "0.3.0.0",
+  "Author": "IT-Stecher",
+  "Actions": [
+    {
+      "Name": "Profile Select",
+      "UUID": "com.it-stecher.artemis-rgb.profile-toggle",
+      "Icon": "imgs/actions/profile-select/icon",
+      "Tooltip": "Select and exclusively load an Artemis RGB profile.",
+      "PropertyInspectorPath": "ui/profile-toggle.html",
+      "Controllers": ["Keypad", "Encoder"],
+      "States": [{"Image":"imgs/actions/profile-select/key","TitleAlignment":"middle"}],
+      "Encoder": {"layout":"$A1","TriggerDescription":{"Rotate":"Select Artemis profile","Push":"Load selected profile"}}
+    },
+    {
+      "Name": "JSON Variable Toggle",
+      "UUID": "com.it-stecher.artemis-rgb.json-variable-toggle",
+      "Icon": "imgs/actions/json-toggle/icon",
+      "Tooltip": "Toggle a boolean variable in Artemis JSON Modules.",
+      "PropertyInspectorPath": "ui/json-variable-toggle.html",
+      "Controllers": ["Keypad", "Encoder"],
+      "States": [{"Image":"imgs/actions/json-toggle/key","TitleAlignment":"middle"}],
+      "Encoder": {"layout":"$A1","TriggerDescription":{"Push":"Toggle Artemis variable"}}
+    },
+    {
+      "Name": "JSON Variable Dial",
+      "UUID": "com.it-stecher.artemis-rgb.json-variable-dial",
+      "Icon": "imgs/actions/json-dial/icon",
+      "Tooltip": "Control a numeric Artemis JSON Module variable with a Stream Deck+ dial.",
+      "PropertyInspectorPath": "ui/json-variable-dial.html",
+      "Controllers": ["Encoder"],
+      "Encoder": {"layout":"$A1","TriggerDescription":{"Rotate":"Adjust Artemis variable","Push":"Reset to default"}}
+    }
+  ],
+  "Category": "Artemis-RGB",
+  "CategoryIcon": "imgs/plugin/category-icon",
+  "CodePath": "bin/plugin.js",
+  "Description": "Control Artemis-RGB profiles and JSON variables from Stream Deck and Stream Deck+.",
+  "Icon": "imgs/plugin/marketplace",
+  "SDKVersion": 3,
+  "Software": {"MinimumVersion":"7.1"},
+  "OS": [{"Platform":"mac","MinimumVersion":"12"},{"Platform":"windows","MinimumVersion":"10"}],
+  "Nodejs": {"Version":"24","Debug":"enabled"},
+  "UUID": "com.it-stecher.artemis-rgb"
+}
