@@ -5,7 +5,7 @@ Control [Artemis RGB](https://artemis-rgb.com/) directly from an Elgato Stream D
 
 This plugin provides profile switching and configurable Artemis JSON variables for both regular Stream Deck keys and Stream Deck+ dials. It communicates with Artemis through its local Web API and is designed to keep the Stream Deck workflow simple while leaving RGB logic inside Artemis.
 
-> Current development version: **0.6.6-dev**
+> Current development version: **0.7.0**
 
 ---
 
