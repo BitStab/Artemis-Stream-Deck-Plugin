@@ -1,5 +1,5 @@
 # Artemis-RGB Stream Deck Plugin
-![image]([https://github.com/BitStab/Artemis-Stream-Deck-Plugin/blob/rc-1/Artemis%20RGB%20Controller%20Setup.png?raw=true])
+<img width="1774" height="887" alt="Artemis RGB Controller Setup" src="https://github.com/user-attachments/assets/acb48463-77ab-42e3-a6e1-35f1fc5c6dde" />
 
 Control [Artemis RGB](https://artemis-rgb.com/) directly from an Elgato Stream Deck or Stream Deck+.
 
