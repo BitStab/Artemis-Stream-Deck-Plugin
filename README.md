@@ -1,4 +1,5 @@
 # Artemis-RGB Stream Deck Plugin
+![image]([https://github.com/BitStab/Artemis-Stream-Deck-Plugin/blob/rc-1/Artemis%20RGB%20Controller%20Setup.png?raw=true])
 
 Control [Artemis RGB](https://artemis-rgb.com/) directly from an Elgato Stream Deck or Stream Deck+.
 
@@ -7,6 +8,8 @@ This plugin provides profile switching and configurable Artemis JSON variables f
 > Current development version: **0.6.6-dev**
 
 ---
+
+![image]([https://github.com/BitStab/Artemis-Stream-Deck-Plugin/blob/rc-1/Artemis%20RGB%20Controller%20%E2%80%93%20Neon%20UI-Banner.png])
 
 ## Features
 
@@ -29,6 +32,7 @@ When a profile is loaded, the plugin uses Artemis' profile suspension API to mak
 This provides a simple "select one active profile" workflow.
 
 ---
+
 
 ### Variable Button
 
