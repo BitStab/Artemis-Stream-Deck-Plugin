@@ -1,0 +1,99 @@
+{
+  "Name": "Artemis RGB Controller",
+  "Version": "0.7.0.0",
+  "Author": "IT-Stecher",
+  "Actions": [
+    {
+      "Name": "Profile Select",
+      "UUID": "com.it-stecher.artemis-rgb-controller.profile-toggle",
+      "Icon": "imgs/actions/profile-select/icon",
+      "Tooltip": "Select and exclusively load an Artemis RGB profile.",
+      "PropertyInspectorPath": "ui/profile-select-native-v066.html",
+      "Controllers": [
+        "Keypad",
+        "Encoder"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/profile-select/key",
+          "TitleAlignment": "bottom",
+          "FontSize": 9,
+          "TitleColor": "#FFFFFF"
+        }
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Select Artemis profile",
+          "Push": "Load selected profile"
+        }
+      }
+    },
+    {
+      "Name": "Variable Button",
+      "UUID": "com.it-stecher.artemis-rgb-controller.json-variable-toggle",
+      "Icon": "imgs/actions/json-toggle/icon",
+      "Tooltip": "Set or toggle Artemis JSON Module variables with a Stream Deck key.",
+      "PropertyInspectorPath": "ui/variable-button-native-v066.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/actions/json-toggle/key",
+          "TitleAlignment": "bottom",
+          "FontSize": 9,
+          "TitleColor": "#FFFFFF"
+        }
+      ]
+    },
+    {
+      "Name": "Variable Dial",
+      "UUID": "com.it-stecher.artemis-rgb-controller.json-variable-dial",
+      "Icon": "imgs/actions/json-dial/icon",
+      "Tooltip": "Control boolean, numeric and string/enum Artemis JSON Module variables with a Stream Deck + dial.",
+      "PropertyInspectorPath": "ui/variable-dial-native-v066.html",
+      "Controllers": [
+        "Encoder"
+      ],
+      "Encoder": {
+        "layout": "$A1",
+        "TriggerDescription": {
+          "Rotate": "Adjust Artemis variable",
+          "Push": "Toggle / reset"
+        },
+        "Icon": "imgs/actions/json-dial/encoder-icon"
+      },
+      "States": [
+        {
+          "Image": "imgs/actions/json-dial/encoder-icon",
+          "TitleAlignment": "middle"
+        }
+      ]
+    }
+  ],
+  "Category": "Artemis RGB Controller",
+  "CategoryIcon": "imgs/plugin/category-icon",
+  "CodePath": "bin/plugin.js",
+  "Description": "Control Artemis RGB profiles and variables from Stream Deck and Stream Deck +.",
+  "Icon": "imgs/plugin/marketplace",
+  "SDKVersion": 3,
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Nodejs": {
+    "Version": "24"
+  },
+  "UUID": "com.it-stecher.artemis-rgb-controller",
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json"
+}

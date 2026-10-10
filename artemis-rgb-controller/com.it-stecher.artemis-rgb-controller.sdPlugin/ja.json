@@ -1,0 +1,59 @@
+{
+  "Name": "Artemis RGB Controller",
+  "Description": "Stream Deck / Stream Deck + から Artemis RGB のプロファイルと変数を制御します。",
+  "com.it-stecher.artemis-rgb-controller.profile-toggle": {
+    "Name": "プロファイル選択",
+    "Tooltip": "Artemis RGB プロファイルを選択して排他的に読み込みます。",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "Artemis プロファイルを選択",
+        "Push": "選択したプロファイルを読み込む"
+      }
+    }
+  },
+  "com.it-stecher.artemis-rgb-controller.json-variable-toggle": {
+    "Name": "変数ボタン",
+    "Tooltip": "Stream Deck キーで Artemis JSON モジュール変数を設定または切り替えます。"
+  },
+  "com.it-stecher.artemis-rgb-controller.json-variable-dial": {
+    "Name": "変数ダイヤル",
+    "Tooltip": "Stream Deck + ダイヤルで Artemis のブール、数値、文字列/列挙変数を制御します。",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "Artemis 変数を調整",
+        "Push": "切り替え / リセット"
+      }
+    }
+  },
+  "Localization": {
+    "common": {
+      "profile": "プロファイル",
+      "variable": "変数",
+      "select": "選択",
+      "set": "設定",
+      "on": "オン",
+      "off": "オフ",
+      "offline": "オフライン",
+      "error": "エラー",
+      "not_found": "見つかりません"
+    },
+    "profile": {
+      "loaded": "読込済み",
+      "press_to_load": "押して読込",
+      "select_profile": "プロファイル選択",
+      "no_profiles": "プロファイルなし",
+      "trigger": {
+        "rotate": "Artemisプロファイルを選択",
+        "push": "選択したプロファイルを読込"
+      }
+    },
+    "variable": {
+      "dial": "Artemisダイヤル",
+      "set_variable": "変数を設定",
+      "trigger": {
+        "rotate": "Artemis変数を調整",
+        "push": "切替 / リセット"
+      }
+    }
+  }
+}

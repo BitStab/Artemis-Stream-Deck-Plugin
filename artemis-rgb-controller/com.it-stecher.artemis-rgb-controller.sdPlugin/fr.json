@@ -1,0 +1,59 @@
+{
+  "Name": "Artemis RGB Controller",
+  "Description": "Contrôlez les profils et variables Artemis RGB depuis Stream Deck et Stream Deck +.",
+  "com.it-stecher.artemis-rgb-controller.profile-toggle": {
+    "Name": "Sélection du profil",
+    "Tooltip": "Sélectionnez et chargez exclusivement un profil Artemis RGB.",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "Sélectionner le profil Artemis",
+        "Push": "Charger le profil sélectionné"
+      }
+    }
+  },
+  "com.it-stecher.artemis-rgb-controller.json-variable-toggle": {
+    "Name": "Bouton de variable",
+    "Tooltip": "Définissez ou basculez des variables de module JSON Artemis avec une touche Stream Deck."
+  },
+  "com.it-stecher.artemis-rgb-controller.json-variable-dial": {
+    "Name": "Molette de variable",
+    "Tooltip": "Contrôlez les variables booléennes, numériques et texte/enum Artemis avec une molette Stream Deck +.",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "Ajuster la variable Artemis",
+        "Push": "Basculer / réinitialiser"
+      }
+    }
+  },
+  "Localization": {
+    "common": {
+      "profile": "Profil",
+      "variable": "Variable",
+      "select": "Choisir",
+      "set": "Définir",
+      "on": "ON",
+      "off": "OFF",
+      "offline": "HORS LIGNE",
+      "error": "ERREUR",
+      "not_found": "Introuvable"
+    },
+    "profile": {
+      "loaded": "CHARGÉ",
+      "press_to_load": "Appuyer pour charger",
+      "select_profile": "Sélectionner profil",
+      "no_profiles": "Aucun profil",
+      "trigger": {
+        "rotate": "Sélectionner le profil Artemis",
+        "push": "Charger le profil sélectionné"
+      }
+    },
+    "variable": {
+      "dial": "Molette Artemis",
+      "set_variable": "Définir variable",
+      "trigger": {
+        "rotate": "Ajuster la variable Artemis",
+        "push": "Basculer / réinitialiser"
+      }
+    }
+  }
+}

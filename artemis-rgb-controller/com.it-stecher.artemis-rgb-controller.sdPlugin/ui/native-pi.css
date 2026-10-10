@@ -1,0 +1,155 @@
+:root {
+    color-scheme: dark;
+    --artemis-pi-bg: #2d2d2d;
+    --artemis-pi-text: #d8d8d8;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    background: var(--artemis-pi-bg);
+    color: var(--artemis-pi-text);
+}
+
+body {
+    min-height: 100vh;
+    padding: 6px 0 14px;
+    background: var(--artemis-pi-bg);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.hidden { display: none !important; }
+
+select,
+input,
+textarea {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+}
+
+.connection-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 84px;
+    gap: 7px;
+    width: 100%;
+}
+
+.split-2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 7px;
+    width: 100%;
+}
+
+.pi-separator {
+    height: 1px;
+    margin: 9px 16px 8px 132px;
+    background: rgba(127, 127, 127, .24);
+}
+
+.pi-section {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 12px 16px 7px 132px;
+    color: inherit;
+    opacity: .58;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: .045em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.pi-section::before,
+.pi-section::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: currentColor;
+    opacity: .28;
+}
+
+.pi-section::before {
+    max-width: 20px;
+}
+
+.pi-status,
+.pi-help {
+    width: 100%;
+    box-sizing: border-box;
+    color: inherit;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.pi-status {
+    display: flex;
+    align-items: center;
+    min-height: 22px;
+    opacity: .82;
+}
+
+.pi-status::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: #8a8a8a;
+}
+
+.pi-status.ok::before { background: #56b870; }
+.pi-status.error::before { background: #d96767; }
+.pi-status.error { opacity: 1; }
+
+.pi-help {
+    display: flex;
+    gap: 7px;
+    opacity: .62;
+}
+
+.pi-help::before {
+    content: "i";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    margin-top: 1px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    opacity: .75;
+}
+
+.pi-actions {
+    display: flex;
+    gap: 7px;
+    width: 100%;
+}
+
+.pi-actions sdpi-button {
+    flex: 1 1 auto;
+}
+
+.pi-delete-note {
+    opacity: .62;
+    font-size: 10px;
+    line-height: 1.25;
+    margin-top: 4px;
+}
+
+@media (max-width: 390px) {
+    .pi-separator,
+    .pi-section {
+        margin-left: 118px;
+    }
+}

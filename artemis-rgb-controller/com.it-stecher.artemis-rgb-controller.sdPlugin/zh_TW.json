@@ -1,0 +1,59 @@
+{
+  "Name": "Artemis RGB Controller",
+  "Description": "透過 Stream Deck 和 Stream Deck + 控制 Artemis RGB 設定檔與變數。",
+  "com.it-stecher.artemis-rgb-controller.profile-toggle": {
+    "Name": "選擇設定檔",
+    "Tooltip": "選擇並獨佔載入 Artemis RGB 設定檔。",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "選擇 Artemis 設定檔",
+        "Push": "載入所選設定檔"
+      }
+    }
+  },
+  "com.it-stecher.artemis-rgb-controller.json-variable-toggle": {
+    "Name": "變數按鈕",
+    "Tooltip": "使用 Stream Deck 按鍵設定或切換 Artemis JSON 模組變數。"
+  },
+  "com.it-stecher.artemis-rgb-controller.json-variable-dial": {
+    "Name": "變數旋鈕",
+    "Tooltip": "使用 Stream Deck + 旋鈕控制 Artemis 布林、數值與字串/列舉變數。",
+    "Encoder": {
+      "TriggerDescription": {
+        "Rotate": "調整 Artemis 變數",
+        "Push": "切換 / 重設"
+      }
+    }
+  },
+  "Localization": {
+    "common": {
+      "profile": "設定檔",
+      "variable": "變數",
+      "select": "選擇",
+      "set": "設定",
+      "on": "開",
+      "off": "關",
+      "offline": "離線",
+      "error": "錯誤",
+      "not_found": "找不到"
+    },
+    "profile": {
+      "loaded": "已載入",
+      "press_to_load": "按下載入",
+      "select_profile": "選擇設定檔",
+      "no_profiles": "無設定檔",
+      "trigger": {
+        "rotate": "選擇 Artemis 設定檔",
+        "push": "載入所選設定檔"
+      }
+    },
+    "variable": {
+      "dial": "Artemis 旋鈕",
+      "set_variable": "設定變數",
+      "trigger": {
+        "rotate": "調整 Artemis 變數",
+        "push": "切換 / 重設"
+      }
+    }
+  }
+}
