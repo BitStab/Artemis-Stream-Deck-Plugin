@@ -9,7 +9,7 @@ This plugin provides profile switching and configurable Artemis JSON variables f
 
 ---
 
-![image]([https://github.com/BitStab/Artemis-Stream-Deck-Plugin/blob/rc-1/Artemis%20RGB%20Controller%20%E2%80%93%20Neon%20UI-Banner.png])
+<img width="1774" height="887" alt="Artemis RGB Controller – Neon UI-Banner" src="https://github.com/user-attachments/assets/a2634f88-0736-4cdd-82c6-d22dfe987a4f" />
 
 ## Features
 
@@ -32,7 +32,7 @@ When a profile is loaded, the plugin uses Artemis' profile suspension API to mak
 This provides a simple "select one active profile" workflow.
 
 ---
-
+<img width="1774" height="887" alt="Artemis RGB Controller Workflow" src="https://github.com/user-attachments/assets/1c236423-5a16-4d56-b45c-e045e524c9ff" />
 
 ### Variable Button
 
