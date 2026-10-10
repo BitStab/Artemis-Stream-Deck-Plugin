@@ -1,7 +1,7 @@
 # Artemis-RGB Stream Deck Plugin
 <img width="1774" height="887" alt="Artemis RGB Controller Setup" src="https://github.com/user-attachments/assets/acb48463-77ab-42e3-a6e1-35f1fc5c6dde" />
 
-Control [Artemis RGB](https://artemis-rgb.com/) directly from an Elgato Stream Deck or Stream Deck+.
+Control [Artemis RGB](https://artemis-rgb.com/) directly from an Elgato Stream Deck or Stream Deck +.
 
 This plugin provides profile switching and configurable Artemis JSON variables for both regular Stream Deck keys and Stream Deck+ dials. It communicates with Artemis through its local Web API and is designed to keep the Stream Deck workflow simple while leaving RGB logic inside Artemis.
 
